@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f3eb">
+  <meta name="description" content="المنيو الإلكتروني للمقهى.">
+  <title>المنيو</title>
+  <link rel="icon" id="site-icon">
+  <link rel="stylesheet" href="styles.css">
+  <script src="cafe-config.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="page-shell">
+    <header class="masthead">
+      <div class="brand-row">
+        <a class="brand" id="brand" href="#top">
+          <span class="brand-mark">
+            <svg id="default-logo" viewBox="0 0 40 40" aria-hidden="true"><path d="M10 14h18v12a7 7 0 0 1-7 7h-4a7 7 0 0 1-7-7V14Zm18 4h3a4 4 0 0 1 0 8h-3M15 8v3m7-3v3m7-3v3"/><path d="M14 19h10"/></svg>
+            <img class="brand-logo" id="brand-logo" alt="" hidden>
+          </span>
+          <span class="brand-name"><span id="brand-name"></span> <span id="brand-descriptor"></span></span>
+        </a>
+        <span class="open-note"><i aria-hidden="true"></i> <span id="header-note"></span></span>
+      </div>
+      <div class="welcome" id="top">
+        <div class="welcome-copy">
+          <p class="eyebrow" id="header-eyebrow"></p>
+          <h1><span id="header-title"></span> <span class="welcome-icon" aria-hidden="true">☕</span></h1>
+          <p class="welcome-line" id="header-description"></p>
+        </div>
+        <div class="bean-art" aria-hidden="true">
+          <svg viewBox="0 0 140 130"><path d="M100 15c26 15 34 47 18 77s-47 43-70 30S13 80 28 49 74 1 100 15Z"/><path d="M94 20C70 42 59 69 56 118"/><path d="M37 38c7 3 13 8 17 15m-24 1c7 4 12 10 15 17m-16 1c6 4 10 10 12 16m54-69c-5 1-10 4-14 8m21 2c-6 2-11 6-15 11m19 2c-7 3-12 8-16 14"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <section class="menu-section" aria-labelledby="menu-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow" id="menu-eyebrow"></p>
+          <h2 id="menu-heading"></h2>
+        </div>
+        <span class="menu-count" id="menu-count" aria-live="polite"></span>
+      </div>
+
+      <div class="category-tabs" role="tablist" aria-label="أقسام المشروبات">
+        <button class="category-tab is-active" id="hot-tab" type="button" role="tab" aria-selected="true" aria-controls="product-list" data-category="hot">
+          <span class="tab-icon" aria-hidden="true">♨</span> المشروبات الساخنة
+        </button>
+        <button class="category-tab" id="cold-tab" type="button" role="tab" aria-selected="false" aria-controls="product-list" data-category="cold" tabindex="-1">
+          <span class="tab-icon cold-icon" aria-hidden="true">❄</span> المشروبات الباردة
+        </button>
+      </div>
+
+      <div class="product-grid" id="product-list" role="tabpanel" aria-labelledby="hot-tab"></div>
+    </section>
+
+    <footer class="page-footer">
+      <div class="footer-slogan"><span id="footer-slogan"></span><span class="footer-bean" aria-hidden="true">✳</span></div>
+      <div class="footer-info" id="footer-info" hidden>
+        <p id="cafe-address" hidden></p>
+        <p id="cafe-hours" hidden></p>
+        <nav class="contact-links" id="contact-links" aria-label="معلومات التواصل"></nav>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>
