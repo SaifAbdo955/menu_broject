@@ -2,6 +2,11 @@ const cafe = window.CAFE_CONFIG;
 const productList = document.querySelector("#product-list");
 const menuCount = document.querySelector("#menu-count");
 const categoryTabs = [...document.querySelectorAll(".category-tab")];
+const offerButton = document.querySelector("#offer-button");
+const offerModal = document.querySelector("#offer-modal");
+const offerImage = document.querySelector("#offer-image");
+const productPreview = document.querySelector("#product-preview");
+const previewImage = document.querySelector("#preview-image");
 const productsCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ_CmvGkiXCbCNY3kcb4wIkms4cDMFLawslQwjK2uza9LxKuDBU9RIPBNM53FefI6PtPHV-9bsZguc5/pub?output=csv";
 
 let activeCategory = "hot";
@@ -95,6 +100,15 @@ function formatPrice(amount) {
   return `${amount.toLocaleString("ar-SA-u-nu-latn")} ريال`;
 }
 
+function normalizeCategory(value) {
+  const category = value.trim().toLowerCase();
+  const compactCategory = category.replace(/\s+/g, "");
+  if (["الحلويات", "حلويات", "حلى", "desserts"].includes(compactCategory)) {
+    return "desserts";
+  }
+  return category;
+}
+
 function parseCsvRows(csvText) {
   const rows = [];
   let row = [];
@@ -143,21 +157,87 @@ function parseProductsCsv(csvText) {
   }
 
   const columnIndex = (name) => headers.indexOf(name);
+  const firstColumnIndex = (...names) => names.map(columnIndex).find((index) => index !== -1) ?? -1;
   const valueAt = (row, name) => {
     const index = columnIndex(name);
     return index === -1 ? "" : (row[index] || "").trim();
   };
+  const valueAtIndex = (row, index) => index === -1 ? "" : (row[index] || "").trim();
+  const offerFlagIndex = firstColumnIndex("is_offer", "عرض_اليوم");
+  const offerPriceIndex = firstColumnIndex("offer_price", "سعر_العرض");
+  const descriptionIndex = firstColumnIndex("description", "notes", "note", "وصف", "ملاحظات");
 
   return rows.slice(1)
     .filter((row) => valueAt(row, "available").toLowerCase() === "yes")
-    .map((row) => ({
-      id: valueAt(row, "id"),
-      name: valueAt(row, "name"),
-      price: Number(valueAt(row, "price")),
-      category: valueAt(row, "category"),
-      image: valueAt(row, "image"),
-      available: valueAt(row, "available")
-    }));
+    .map((row) => {
+      const offerPriceValue = valueAtIndex(row, offerPriceIndex);
+      return {
+        id: valueAt(row, "id"),
+        name: valueAt(row, "name"),
+        price: Number(valueAt(row, "price")),
+        category: normalizeCategory(valueAt(row, "category")),
+        image: valueAt(row, "image"),
+        available: valueAt(row, "available"),
+        description: valueAtIndex(row, descriptionIndex),
+        isOffer: ["yes", "نعم", "true", "1"].includes(valueAtIndex(row, offerFlagIndex).toLowerCase()),
+        offerPrice: offerPriceValue ? Number(offerPriceValue) : NaN
+      };
+    });
+}
+
+function renderDailyOffer() {
+  const offer = products.find((product) => product.isOffer && Number.isFinite(product.offerPrice));
+  offerButton.hidden = !offer;
+  if (!offer) return;
+
+  document.querySelector("#offer-name").textContent = offer.name;
+  document.querySelector("#offer-price").textContent = formatPrice(offer.offerPrice);
+  const originalPrice = document.querySelector("#offer-original");
+  originalPrice.hidden = !Number.isFinite(offer.price);
+  originalPrice.textContent = Number.isFinite(offer.price) ? formatPrice(offer.price) : "";
+
+  const imagePath = typeof offer.image === "string" ? offer.image.trim() : "";
+  offerImage.hidden = !imagePath;
+  offerImage.alt = imagePath ? offer.name : "";
+  offerImage.src = imagePath;
+  offerImage.onerror = () => {
+    offerImage.hidden = true;
+  };
+}
+
+function showProductPreview(product) {
+  const productCategory = product.category === "hot"
+    ? "مشروب ساخن"
+    : product.category === "cold" ? "مشروب بارد"
+      : product.category === "desserts" ? "حلويات" : product.category;
+  const category = document.querySelector("#preview-category");
+  category.textContent = productCategory;
+  category.hidden = !productCategory;
+
+  document.querySelector("#preview-name").textContent = product.name;
+  const description = document.querySelector("#preview-description");
+  description.textContent = product.description;
+  description.hidden = !product.description;
+
+  const hasOfferPrice = product.isOffer && Number.isFinite(product.offerPrice);
+  document.querySelector("#preview-price").textContent =
+    formatPrice(hasOfferPrice ? product.offerPrice : product.price);
+  const originalPrice = document.querySelector("#preview-original");
+  originalPrice.hidden = !hasOfferPrice || !Number.isFinite(product.price);
+  originalPrice.textContent = originalPrice.hidden ? "" : formatPrice(product.price);
+
+  const imagePath = typeof product.image === "string" ? product.image.trim() : "";
+  previewImage.hidden = !imagePath;
+  previewImage.alt = imagePath ? product.name : "";
+  previewImage.onerror = () => {
+    previewImage.hidden = true;
+  };
+  if (imagePath) {
+    previewImage.src = imagePath;
+  } else {
+    previewImage.removeAttribute("src");
+  }
+  productPreview.showModal();
 }
 
 function renderProducts() {
@@ -168,6 +248,20 @@ function renderProducts() {
     const card = document.createElement("article");
     card.className = "product-card";
     card.style.setProperty("--card-order", index);
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-haspopup", "dialog");
+    card.setAttribute("aria-label", `${product.name}، ${formatPrice(product.price)}، معاينة التفاصيل`);
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("button, a, input, select, textarea")) return;
+      showProductPreview(product);
+    });
+    card.addEventListener("keydown", (event) => {
+      if ((event.key === "Enter" || event.key === " ") && event.target === card) {
+        event.preventDefault();
+        showProductPreview(product);
+      }
+    });
 
     const motif = document.createElement("span");
     motif.className = "product-motif";
@@ -206,9 +300,17 @@ function renderProducts() {
     fragment.append(card);
   });
 
+  if (activeCategory === "desserts" && visibleProducts.length === 0) {
+    const emptyState = document.createElement("p");
+    emptyState.className = "empty-state";
+    emptyState.setAttribute("role", "status");
+    emptyState.textContent = "لا تتوفر أصناف حلويات حالياً، نأمل زيارتكم قريباً.";
+    fragment.append(emptyState);
+  }
+
   productList.replaceChildren(fragment);
   productList.setAttribute("aria-labelledby", `${activeCategory}-tab`);
-  menuCount.textContent = `${visibleProducts.length} مشروب`;
+  menuCount.textContent = `${visibleProducts.length} ${activeCategory === "desserts" ? "صنف" : "مشروب"}`;
 }
 
 async function loadProducts() {
@@ -220,12 +322,30 @@ async function loadProducts() {
     }
     products = parseProductsCsv(await response.text());
     renderProducts();
+    renderDailyOffer();
   } catch (error) {
     console.error("تعذر تحميل منتجات القائمة من Google Sheets.", error);
     productList.replaceChildren();
     menuCount.textContent = "تعذر تحميل المنتجات";
+    offerButton.hidden = true;
   }
 }
+
+offerButton.addEventListener("click", () => offerModal.showModal());
+document.querySelector("#offer-close").addEventListener("click", () => offerModal.close());
+offerModal.addEventListener("click", (event) => {
+  if (event.target === offerModal) offerModal.close();
+});
+offerModal.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") offerModal.close();
+});
+document.querySelector("#preview-close").addEventListener("click", () => productPreview.close());
+productPreview.addEventListener("click", (event) => {
+  if (event.target === productPreview) productPreview.close();
+});
+productPreview.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") productPreview.close();
+});
 
 function selectCategory(category) {
   activeCategory = category;

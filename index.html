@@ -29,6 +29,9 @@
           <p class="eyebrow" id="header-eyebrow"></p>
           <h1><span id="header-title"></span> <span class="welcome-icon" aria-hidden="true">☕</span></h1>
           <p class="welcome-line" id="header-description"></p>
+          <button class="offer-button" id="offer-button" type="button" aria-haspopup="dialog" hidden>
+            <span aria-hidden="true">🔥</span> عرض اليوم
+          </button>
         </div>
         <div class="bean-art" aria-hidden="true">
           <svg viewBox="0 0 140 130"><path d="M100 15c26 15 34 47 18 77s-47 43-70 30S13 80 28 49 74 1 100 15Z"/><path d="M94 20C70 42 59 69 56 118"/><path d="M37 38c7 3 13 8 17 15m-24 1c7 4 12 10 15 17m-16 1c6 4 10 10 12 16m54-69c-5 1-10 4-14 8m21 2c-6 2-11 6-15 11m19 2c-7 3-12 8-16 14"/></svg>
@@ -45,12 +48,15 @@
         <span class="menu-count" id="menu-count" aria-live="polite"></span>
       </div>
 
-      <div class="category-tabs" role="tablist" aria-label="أقسام المشروبات">
+      <div class="category-tabs" role="tablist" aria-label="أقسام المنيو">
         <button class="category-tab is-active" id="hot-tab" type="button" role="tab" aria-selected="true" aria-controls="product-list" data-category="hot">
           <span class="tab-icon" aria-hidden="true">♨</span> المشروبات الساخنة
         </button>
         <button class="category-tab" id="cold-tab" type="button" role="tab" aria-selected="false" aria-controls="product-list" data-category="cold" tabindex="-1">
           <span class="tab-icon cold-icon" aria-hidden="true">❄</span> المشروبات الباردة
+        </button>
+        <button class="category-tab" id="desserts-tab" type="button" role="tab" aria-selected="false" aria-controls="product-list" data-category="desserts" tabindex="-1">
+          <span class="tab-icon" aria-hidden="true">🍰</span> الحلويات
         </button>
       </div>
 
@@ -66,5 +72,34 @@
       </div>
     </footer>
   </main>
+
+  <dialog class="offer-modal" id="offer-modal" aria-labelledby="offer-name">
+    <article class="offer-card">
+      <button class="offer-close" id="offer-close" type="button" aria-label="إغلاق العرض">×</button>
+      <p class="offer-eyebrow">🔥 عرض اليوم</p>
+      <img class="offer-image" id="offer-image" alt="" hidden>
+      <h2 class="offer-name" id="offer-name"></h2>
+      <div class="offer-prices">
+        <s class="offer-original" id="offer-original"></s>
+        <p class="offer-price" id="offer-price"></p>
+      </div>
+    </article>
+  </dialog>
+
+  <dialog class="product-preview" id="product-preview" aria-labelledby="preview-name">
+    <article class="product-preview-card">
+      <button class="preview-close" id="preview-close" type="button" aria-label="إغلاق المعاينة">×</button>
+      <img class="preview-image" id="preview-image" alt="" hidden>
+      <div class="preview-content">
+        <p class="preview-category" id="preview-category" hidden></p>
+        <h2 class="preview-name" id="preview-name"></h2>
+        <p class="preview-description" id="preview-description" hidden></p>
+        <div class="preview-prices">
+          <s class="preview-original" id="preview-original" hidden></s>
+          <p class="preview-price" id="preview-price"></p>
+        </div>
+      </div>
+    </article>
+  </dialog>
 </body>
 </html>
