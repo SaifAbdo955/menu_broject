@@ -1,5 +1,5 @@
 window.CAFE_PRODUCTS = [
-  { id: "hot-turkish", name: "قهوة تركي", price: 5, category: "hot", image: "s" },
+  { id: "hot-turkish", name: "قهوة تركي", price: 5, category: "hot", image: "images/Turkish Coffee.jfif" },
   { id: "hot-turkish-milk", name: "قهوة تركي مع الحليب", price: 7, category: "hot", image: "" },
   { id: "hot-americano", name: "أمريكانو", price: 7, category: "hot", image: "images/Iced Americano🧊.jfif" },
   { id: "hot-espresso", name: "إسبريسو", price: 5, category: "hot", image: "images/Espresso coffee.jfif" },

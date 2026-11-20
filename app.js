@@ -84,9 +84,15 @@ function renderCafeInfo() {
   };
 
   const phone = contact.phone.replace(/[^\d+]/g, "");
-  const whatsapp = contact.whatsapp.replace(/\D/g, "");
+  const whatsappValue = typeof contact.whatsapp === "string" ? contact.whatsapp.trim() : "";
+  const whatsapp = /^https?:\/\//i.test(whatsappValue)
+    ? whatsappValue
+    : whatsappValue.replace(/\D/g, "");
+  const whatsappHref = /^https?:\/\//i.test(whatsapp)
+    ? whatsapp
+    : whatsapp ? `https://wa.me/${whatsapp}` : "";
   addLink("اتصال", phone ? `tel:${phone}` : "", false);
-  addLink("واتساب", whatsapp ? `https://wa.me/${whatsapp}` : "", true, true);
+  addLink("واتساب", whatsappHref, true, true);
   addLink("إنستغرام", contact.instagram, true, true);
   addLink("تيك توك", contact.tiktok, true, true);
   addLink("سناب شات", contact.snapchat, true, true);
