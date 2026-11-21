@@ -316,8 +316,12 @@ button:focus-visible, a:focus-visible, .product-card:focus-visible { outline: 3p
 .product-card:hover .product-image { transform: scale(1.035); }
 .product-details { display: flex; width: 100%; min-width: 0; flex: 1; flex-direction: column; padding: 0 4px 4px; }
 .product-name { min-height: 0; margin: 0; color: var(--brown-deep); font-size: 16px; font-weight: 800; line-height: 1.65; overflow-wrap: anywhere; }
-.product-price { width: fit-content; margin: auto 0 0; padding: 7px 11px 0; color: var(--brown); font-size: 14px; font-weight: 800; }
+.product-prices { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin-top: auto; padding-top: 7px; }
+.product-price { margin: 0; color: var(--brown); font-size: 14px; font-weight: 800; }
 .product-price[hidden] { display: none; }
+.product-original { color: var(--muted); font-size: 12px; }
+.product-original[hidden] { display: none; }
+.product-price.is-invalid, .preview-price.is-invalid { color: #a34a32; font-size: 12px; }
 
 .page-footer { display: flex; flex-direction: column; align-items: center; gap: 11px; margin-top: 52px; color: var(--muted); font-size: 12px; text-align: center; }
 .footer-slogan { display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -382,7 +386,7 @@ button:focus-visible, a:focus-visible, .product-card:focus-visible { outline: 3p
   .product-image-frame { height: clamp(128px, 42vw, 172px); border-radius: 12px; }
   .product-details { padding: 0 3px 3px; }
   .product-name { font-size: 14px; line-height: 1.6; }
-  .product-price { padding: 6px 8px 0; font-size: 12px; }
+  .product-price { font-size: 12px; }
   .page-footer { margin-top: 38px; }
 }
 

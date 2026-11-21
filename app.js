@@ -106,6 +106,31 @@ function formatPrice(amount) {
   return `${amount.toLocaleString("ar-SA-u-nu-latn")} ريال`;
 }
 
+function parsePrice(value) {
+  const normalized = value
+    .trim()
+    .replace(/[٠-٩]/g, (digit) => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)))
+    .replace(/[۰-۹]/g, (digit) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
+    .replace(/٫/g, ".")
+    .replace(/٬/g, ",")
+    .replace(/(?:SAR|SR|ر\.?\s*س\.?|ريال(?:\s*سعودي(?:ة)?)?)/gi, "")
+    .replace(/[﷼$€£]/g, "")
+    .replace(/\s+/g, "");
+
+  if (!normalized) return NaN;
+
+  let numericValue = normalized;
+  if (/^[+-]?\d{1,3}(?:,\d{3})+(?:\.\d+)?$/.test(numericValue)) {
+    numericValue = numericValue.replace(/,/g, "");
+  } else if (/^[+-]?\d+,\d{1,2}$/.test(numericValue) && !numericValue.includes(".")) {
+    numericValue = numericValue.replace(",", ".");
+  }
+
+  if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(numericValue)) return NaN;
+  const price = Number(numericValue);
+  return Number.isFinite(price) ? price : NaN;
+}
+
 function normalizeCategory(value) {
   const category = value.trim().toLowerCase();
   const compactCategory = category.replace(/\s+/g, "");
@@ -155,8 +180,8 @@ function parseProductsCsv(csvText) {
   const rows = parseCsvRows(csvText.replace(/^\uFEFF/, ""));
   if (rows.length === 0) return [];
 
-  const headers = rows[0].map((header) => header.trim().toLowerCase());
-  const requiredColumns = ["id", "name", "price", "category", "available"];
+  const headers = rows[0].map((header) => header.trim().toLowerCase().replace(/[\s-]+/g, "_"));
+  const requiredColumns = ["id", "name", "category", "available"];
   const missingColumns = requiredColumns.filter((column) => !headers.includes(column));
   if (missingColumns.length) {
     throw new Error(`أعمدة CSV المطلوبة غير موجودة: ${missingColumns.join(", ")}`);
@@ -169,27 +194,48 @@ function parseProductsCsv(csvText) {
     return index === -1 ? "" : (row[index] || "").trim();
   };
   const valueAtIndex = (row, index) => index === -1 ? "" : (row[index] || "").trim();
+  const priceIndex = firstColumnIndex("price", "السعر", "سعر", "price_sar", "السعر_بالريال", "سعر_المنتج");
   const offerFlagIndex = firstColumnIndex("is_offer", "عرض_اليوم");
   const offerPriceIndex = firstColumnIndex("offer_price", "سعر_العرض");
   const descriptionIndex = firstColumnIndex("description", "notes", "note", "وصف", "ملاحظات");
 
-  return rows.slice(1)
+  if (priceIndex === -1) {
+    console.warn("لم يتم العثور على عمود سعر معروف في CSV. استخدم price أو السعر أو سعر.");
+  }
+
+  const invalidPrices = [];
+  const parsedProducts = rows.slice(1)
     .filter((row) => valueAt(row, "available").toLowerCase() === "yes")
     .map((row) => {
       const offerPriceValue = valueAtIndex(row, offerPriceIndex);
-      const priceValue = valueAt(row, "price");
+      const priceValue = valueAtIndex(row, priceIndex);
+      const isOffer = ["yes", "نعم", "true", "1"].includes(valueAtIndex(row, offerFlagIndex).toLowerCase());
+      const price = parsePrice(priceValue);
+      const offerPrice = parsePrice(offerPriceValue);
+      if (priceIndex !== -1 && !Number.isFinite(price)) {
+        invalidPrices.push(`${valueAt(row, "id")} (${valueAt(row, "name")}): ${priceValue || "(فارغ)"}`);
+      }
+      if (isOffer && !Number.isFinite(offerPrice)) {
+        invalidPrices.push(`${valueAt(row, "id")} (${valueAt(row, "name")})، offer_price: ${offerPriceValue || "(فارغ)"}`);
+      }
       return {
         id: valueAt(row, "id"),
         name: valueAt(row, "name"),
-        price: priceValue ? Number(priceValue) : NaN,
+        price,
+        priceInvalid: priceIndex !== -1 && !Number.isFinite(price),
         category: normalizeCategory(valueAt(row, "category")),
         image: valueAt(row, "image"),
         available: valueAt(row, "available"),
         description: valueAtIndex(row, descriptionIndex),
-        isOffer: ["yes", "نعم", "true", "1"].includes(valueAtIndex(row, offerFlagIndex).toLowerCase()),
-        offerPrice: offerPriceValue ? Number(offerPriceValue) : NaN
+        isOffer,
+        offerPrice
       };
     });
+
+  if (invalidPrices.length) {
+    console.warn("تعذر قراءة بعض الأسعار؛ تحقق من أن خلايا السعر تحتوي أرقاماً فعلية:", invalidPrices);
+  }
+  return parsedProducts;
 }
 
 function renderDailyOffer() {
@@ -231,9 +277,13 @@ function showProductPreview(product) {
 
   const hasOfferPrice = product.isOffer && Number.isFinite(product.offerPrice);
   const displayPrice = hasOfferPrice ? product.offerPrice : product.price;
+  const displayPriceInvalid = !hasOfferPrice && product.priceInvalid;
   const previewPrice = document.querySelector("#preview-price");
-  previewPrice.hidden = !Number.isFinite(displayPrice);
-  previewPrice.textContent = previewPrice.hidden ? "" : formatPrice(displayPrice);
+  previewPrice.hidden = !Number.isFinite(displayPrice) && !displayPriceInvalid;
+  previewPrice.classList.toggle("is-invalid", displayPriceInvalid);
+  previewPrice.textContent = Number.isFinite(displayPrice)
+    ? formatPrice(displayPrice)
+    : displayPriceInvalid ? "تحقق من السعر" : "";
   const originalPrice = document.querySelector("#preview-original");
   originalPrice.hidden = !hasOfferPrice || !Number.isFinite(product.price);
   originalPrice.textContent = originalPrice.hidden ? "" : formatPrice(product.price);
@@ -271,6 +321,7 @@ function renderProducts() {
     const cardPrice = product.isOffer && Number.isFinite(product.offerPrice)
       ? product.offerPrice
       : product.price;
+    const cardPriceInvalid = !(product.isOffer && Number.isFinite(product.offerPrice)) && product.priceInvalid;
     const formattedCardPrice = Number.isFinite(cardPrice) ? `، ${formatPrice(cardPrice)}` : "";
     card.setAttribute("aria-label", `${product.name}${formattedCardPrice}، معاينة التفاصيل`);
     card.addEventListener("click", (event) => {
@@ -301,8 +352,20 @@ function renderProducts() {
 
     const price = document.createElement("p");
     price.className = "product-price";
-    price.hidden = !Number.isFinite(cardPrice);
-    price.textContent = price.hidden ? "" : formatPrice(cardPrice);
+    price.hidden = !Number.isFinite(cardPrice) && !cardPriceInvalid;
+    price.classList.toggle("is-invalid", cardPriceInvalid);
+    price.textContent = Number.isFinite(cardPrice)
+      ? formatPrice(cardPrice)
+      : cardPriceInvalid ? "تحقق من السعر" : "";
+
+    const prices = document.createElement("div");
+    prices.className = "product-prices";
+    const originalPrice = document.createElement("s");
+    originalPrice.className = "product-original";
+    const hasOfferPrice = product.isOffer && Number.isFinite(product.offerPrice);
+    originalPrice.hidden = !hasOfferPrice || !Number.isFinite(product.price);
+    originalPrice.textContent = originalPrice.hidden ? "" : formatPrice(product.price);
+    prices.append(originalPrice, price);
 
     const imagePath = typeof product.image === "string" ? product.image.trim() : "";
     if (imagePath) {
@@ -319,7 +382,7 @@ function renderProducts() {
       content.append(imageFrame);
     }
 
-    details.append(name, price);
+    details.append(name, prices);
     content.append(details);
     card.append(motif, content);
     fragment.append(card);
