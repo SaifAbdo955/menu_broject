@@ -177,10 +177,11 @@ function parseProductsCsv(csvText) {
     .filter((row) => valueAt(row, "available").toLowerCase() === "yes")
     .map((row) => {
       const offerPriceValue = valueAtIndex(row, offerPriceIndex);
+      const priceValue = valueAt(row, "price");
       return {
         id: valueAt(row, "id"),
         name: valueAt(row, "name"),
-        price: Number(valueAt(row, "price")),
+        price: priceValue ? Number(priceValue) : NaN,
         category: normalizeCategory(valueAt(row, "category")),
         image: valueAt(row, "image"),
         available: valueAt(row, "available"),
@@ -229,11 +230,15 @@ function showProductPreview(product) {
   description.hidden = !product.description;
 
   const hasOfferPrice = product.isOffer && Number.isFinite(product.offerPrice);
-  document.querySelector("#preview-price").textContent =
-    formatPrice(hasOfferPrice ? product.offerPrice : product.price);
+  const displayPrice = hasOfferPrice ? product.offerPrice : product.price;
+  const previewPrice = document.querySelector("#preview-price");
+  previewPrice.hidden = !Number.isFinite(displayPrice);
+  previewPrice.textContent = previewPrice.hidden ? "" : formatPrice(displayPrice);
   const originalPrice = document.querySelector("#preview-original");
   originalPrice.hidden = !hasOfferPrice || !Number.isFinite(product.price);
   originalPrice.textContent = originalPrice.hidden ? "" : formatPrice(product.price);
+  document.querySelector(".preview-prices").hidden =
+    previewPrice.hidden && originalPrice.hidden;
 
   const imagePath = typeof product.image === "string" ? product.image.trim() : "";
   const previewImageFrame = document.querySelector("#preview-image-frame");
@@ -263,7 +268,11 @@ function renderProducts() {
     card.tabIndex = 0;
     card.setAttribute("role", "button");
     card.setAttribute("aria-haspopup", "dialog");
-    card.setAttribute("aria-label", `${product.name}، ${formatPrice(product.price)}، معاينة التفاصيل`);
+    const cardPrice = product.isOffer && Number.isFinite(product.offerPrice)
+      ? product.offerPrice
+      : product.price;
+    const formattedCardPrice = Number.isFinite(cardPrice) ? `، ${formatPrice(cardPrice)}` : "";
+    card.setAttribute("aria-label", `${product.name}${formattedCardPrice}، معاينة التفاصيل`);
     card.addEventListener("click", (event) => {
       if (event.target.closest("button, a, input, select, textarea")) return;
       showProductPreview(product);
@@ -292,7 +301,8 @@ function renderProducts() {
 
     const price = document.createElement("p");
     price.className = "product-price";
-    price.textContent = formatPrice(product.price);
+    price.hidden = !Number.isFinite(cardPrice);
+    price.textContent = price.hidden ? "" : formatPrice(cardPrice);
 
     const imagePath = typeof product.image === "string" ? product.image.trim() : "";
     if (imagePath) {
