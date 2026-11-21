@@ -203,10 +203,13 @@ function renderDailyOffer() {
   originalPrice.textContent = Number.isFinite(offer.price) ? formatPrice(offer.price) : "";
 
   const imagePath = typeof offer.image === "string" ? offer.image.trim() : "";
+  const offerImageFrame = document.querySelector("#offer-image-frame");
+  offerImageFrame.hidden = !imagePath;
   offerImage.hidden = !imagePath;
   offerImage.alt = imagePath ? offer.name : "";
   offerImage.src = imagePath;
   offerImage.onerror = () => {
+    offerImageFrame.hidden = true;
     offerImage.hidden = true;
   };
 }
@@ -233,9 +236,12 @@ function showProductPreview(product) {
   originalPrice.textContent = originalPrice.hidden ? "" : formatPrice(product.price);
 
   const imagePath = typeof product.image === "string" ? product.image.trim() : "";
+  const previewImageFrame = document.querySelector("#preview-image-frame");
+  previewImageFrame.hidden = !imagePath;
   previewImage.hidden = !imagePath;
   previewImage.alt = imagePath ? product.name : "";
   previewImage.onerror = () => {
+    previewImageFrame.hidden = true;
     previewImage.hidden = true;
   };
   if (imagePath) {
@@ -290,14 +296,17 @@ function renderProducts() {
 
     const imagePath = typeof product.image === "string" ? product.image.trim() : "";
     if (imagePath) {
+      const imageFrame = document.createElement("div");
+      imageFrame.className = "product-image-frame";
       const image = document.createElement("img");
       image.className = "product-image";
       image.src = imagePath;
       image.alt = "";
       image.loading = "lazy";
       image.decoding = "async";
-      image.addEventListener("error", () => image.remove(), { once: true });
-      content.append(image);
+      image.addEventListener("error", () => imageFrame.remove(), { once: true });
+      imageFrame.append(image);
+      content.append(imageFrame);
     }
 
     details.append(name, price);
