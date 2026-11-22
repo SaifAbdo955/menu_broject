@@ -14,6 +14,7 @@
   --muted: #81786d;
   --line: #e9e0d4;
   --green: #607257;
+  --hero-background: #e8e2cc;
   font-family: "Tajawal", "Noto Sans Arabic", "Geeza Pro", Tahoma, Arial, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -65,9 +66,9 @@ button:focus-visible, a:focus-visible, .product-card:focus-visible { outline: 3p
 .open-note { display: flex; align-items: center; gap: 7px; color: var(--brown); font-size: 13px; font-weight: 600; }
 .open-note i { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px rgb(96 114 87 / 12%); }
 
-.hero { margin-top: 22px; overflow: hidden; border: 1px solid var(--sand-deep); border-radius: 22px; background: var(--paper); box-shadow: 0 16px 38px rgb(68 46 34 / 8%); }
+.hero { margin-top: 22px; overflow: hidden; border-radius: 22px; background: var(--hero-background); box-shadow: 0 16px 38px rgb(68 46 34 / 8%); }
 .hero-banner { display: block; width: 100%; height: clamp(250px, 42vw, 520px); object-fit: cover; object-position: center; }
-.hero-copy { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 26px; background: linear-gradient(108deg, #f8f4eb, #e6eddf); }
+.hero-copy { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 26px; background: var(--hero-background); }
 .hero-text { min-width: 0; }
 .eyebrow { margin: 0 0 4px; color: var(--brown); font-size: 14px; font-weight: 700; line-height: 1.6; }
 .hero-copy h1 { margin: 0; color: var(--brown-deep); font-size: 27px; font-weight: 700; line-height: 1.5; }
