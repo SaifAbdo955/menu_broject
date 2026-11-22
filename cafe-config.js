@@ -6,8 +6,8 @@ window.CAFE_CONFIG = {
   header: {
     note: "  طاقتك اليوميه جاهزه",
     eyebrow: "نكهات تروي المزاج",
-    title: "مزاجك يبداء من هنا",
-    description: "   روقان على اصوله.",
+    title: "مزاجك يبدأ من هنا",
+    description: "روقان على أصوله.",
     menuEyebrow: "منيو بلانت ليف",
     menuTitle: "اختر مزاجك",
     footer: "لحظتك الحلوة تبدأ من هنا"

@@ -47,6 +47,9 @@ function renderCafeInfo() {
   setText("#brand-descriptor", cafe.brandDescriptor);
   document.querySelector(".hero-banner").alt = `${cafe.name} ${cafe.brandDescriptor}`;
   setText("#header-note", cafe.header.note);
+  setText("#header-eyebrow", cafe.header.eyebrow);
+  setText("#header-title", cafe.header.title);
+  setText("#header-description", cafe.header.description);
   setText("#menu-eyebrow", cafe.header.menuEyebrow);
   setText("#menu-heading", cafe.header.menuTitle);
   setText("#footer-slogan", cafe.header.footer);
