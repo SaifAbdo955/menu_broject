@@ -8,9 +8,70 @@ const offerImage = document.querySelector("#offer-image");
 const productPreview = document.querySelector("#product-preview");
 const previewImage = document.querySelector("#preview-image");
 const productsCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ_CmvGkiXCbCNY3kcb4wIkms4cDMFLawslQwjK2uza9LxKuDBU9RIPBNM53FefI6PtPHV-9bsZguc5/pub?output=csv";
+const fallbackImageUrl = "images/image-placeholder.svg";
 
 let activeCategory = "hot";
 let products = [];
+
+function getGoogleDriveFileId(rawUrl) {
+  try {
+    const imageUrl = typeof rawUrl === "string" ? rawUrl.trim() : "";
+    if (!imageUrl) return "";
+
+    const url = new URL(imageUrl);
+    const host = url.hostname.toLowerCase();
+    if (
+      (url.protocol !== "https:" && url.protocol !== "http:")
+      || (host !== "drive.google.com" && !host.endsWith(".drive.google.com")
+        && host !== "drive.usercontent.google.com")
+    ) {
+      return "";
+    }
+
+    const pathMatch = url.pathname.match(/\/file\/d\/([^/]+)/i);
+    const fileId = pathMatch ? pathMatch[1] : url.searchParams.get("id");
+    return fileId && /^[\w-]+$/.test(fileId) ? fileId : "";
+  } catch {
+    return "";
+  }
+}
+
+function resolveImageUrl(rawUrl) {
+  const imageUrl = typeof rawUrl === "string" ? rawUrl.trim() : "";
+  if (!imageUrl) return "";
+
+  const fileId = getGoogleDriveFileId(imageUrl);
+  return fileId
+    ? `https://lh3.googleusercontent.com/d/${encodeURIComponent(fileId)}`
+    : imageUrl;
+}
+
+function setImageSource(image, rawUrl, onFallbackError) {
+  const imageUrl = resolveImageUrl(rawUrl);
+  if (!imageUrl) return false;
+
+  const fileId = getGoogleDriveFileId(rawUrl);
+  let triedDriveFallback = false;
+  let triedLocalFallback = false;
+
+  image.onerror = () => {
+    if (fileId && !triedDriveFallback) {
+      triedDriveFallback = true;
+      image.src = `https://drive.google.com/thumbnail?id=${encodeURIComponent(fileId)}&sz=w1000`;
+      return;
+    }
+    if (!triedLocalFallback) {
+      triedLocalFallback = true;
+      image.src = fallbackImageUrl;
+      return;
+    }
+
+    image.onerror = null;
+    if (onFallbackError) onFallbackError();
+  };
+  image.src = imageUrl;
+  return true;
+}
 
 function setText(selector, value) {
   document.querySelector(selector).textContent = value || "";
@@ -258,11 +319,15 @@ function renderDailyOffer() {
   offerImageFrame.hidden = !imagePath;
   offerImage.hidden = !imagePath;
   offerImage.alt = imagePath ? offer.name : "";
-  offerImage.src = imagePath;
-  offerImage.onerror = () => {
-    offerImageFrame.hidden = true;
-    offerImage.hidden = true;
-  };
+  offerImage.onerror = null;
+  if (imagePath) {
+    setImageSource(offerImage, imagePath, () => {
+      offerImageFrame.hidden = true;
+      offerImage.hidden = true;
+    });
+  } else {
+    offerImage.removeAttribute("src");
+  }
 }
 
 function showProductPreview(product) {
@@ -300,12 +365,12 @@ function showProductPreview(product) {
   previewImageFrame.hidden = !imagePath;
   previewImage.hidden = !imagePath;
   previewImage.alt = imagePath ? product.name : "";
-  previewImage.onerror = () => {
-    previewImageFrame.hidden = true;
-    previewImage.hidden = true;
-  };
+  previewImage.onerror = null;
   if (imagePath) {
-    previewImage.src = imagePath;
+    setImageSource(previewImage, imagePath, () => {
+      previewImageFrame.hidden = true;
+      previewImage.hidden = true;
+    });
   } else {
     previewImage.removeAttribute("src");
   }
@@ -378,13 +443,12 @@ function renderProducts() {
       imageFrame.className = "product-image-frame";
       const image = document.createElement("img");
       image.className = "product-image";
-      image.src = imagePath;
       image.alt = "";
       image.loading = "lazy";
       image.decoding = "async";
-      image.addEventListener("error", () => imageFrame.remove(), { once: true });
       imageFrame.append(image);
       content.append(imageFrame);
+      setImageSource(image, imagePath, () => imageFrame.remove());
     }
 
     details.append(name, prices);
