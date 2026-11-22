@@ -14,9 +14,6 @@
   --muted: #81786d;
   --line: #e9e0d4;
   --green: #607257;
-  --welcome-start: #eadcc8;
-  --welcome-mid: #f0e6d8;
-  --welcome-end: #e7d6bf;
   font-family: "Noto Sans Arabic", "Geeza Pro", Tahoma, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -68,38 +65,16 @@ button:focus-visible, a:focus-visible, .product-card:focus-visible { outline: 3p
 .open-note { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; }
 .open-note i { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px rgb(96 114 87 / 12%); }
 
-.welcome {
-  position: relative;
-  display: flex;
-  min-height: 230px;
-  align-items: center;
-  justify-content: space-between;
-  overflow: hidden;
-  margin-top: 22px;
-  padding: 28px 34px;
-  border: 1px solid var(--sand-deep);
-  border-radius: 22px;
-  background: linear-gradient(108deg, var(--welcome-start) 0%, var(--welcome-mid) 52%, var(--welcome-end) 100%);
-  box-shadow: 0 16px 38px rgb(68 46 34 / 8%);
-}
-.welcome::after {
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(135deg, transparent 0 24px, rgb(255 255 255 / 14%) 24px 25px);
-  content: "";
-  pointer-events: none;
-}
-.welcome-copy { position: relative; z-index: 1; }
+.hero { display: flex; flex-direction: column; align-items: stretch; margin-top: 22px; }
+.hero-banner { display: block; width: 100%; height: auto; object-fit: contain; border-radius: 22px; box-shadow: 0 16px 38px rgb(68 46 34 / 8%); }
 .eyebrow { margin: 0 0 6px; color: var(--brown-soft); font-size: 12px; font-weight: 700; }
-.welcome h1 { margin: 0; color: var(--brown-deep); font-size: 28px; font-weight: 800; line-height: 1.6; }
-.welcome h1 .welcome-icon { display: inline-block; color: var(--brown); font-size: 22px; }
-.welcome-line { margin: 5px 0 0; color: #655342; font-size: 15px; }
 .offer-button {
   display: inline-flex;
   min-height: 42px;
+  align-self: flex-start;
   align-items: center;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 12px;
   padding: 8px 17px;
   border: 1px solid var(--brown);
   border-radius: 999px;
@@ -113,8 +88,6 @@ button:focus-visible, a:focus-visible, .product-card:focus-visible { outline: 3p
 }
 .offer-button:hover { transform: translateY(-2px); background: var(--brown-deep); box-shadow: 0 11px 24px rgb(68 46 34 / 22%); }
 .offer-button[hidden], .offer-image[hidden] { display: none; }
-.bean-art { position: absolute; inset-inline-end: 6%; top: 50%; width: 128px; transform: translateY(-50%) rotate(-6deg); opacity: .58; }
-.bean-art svg { display: block; width: 100%; fill: none; stroke: var(--brown); stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
 
 .offer-modal {
   width: min(480px, calc(100% - 32px));
@@ -245,7 +218,7 @@ button:focus-visible, a:focus-visible, .product-card:focus-visible { outline: 3p
 .section-heading .eyebrow { margin-bottom: 1px; }
 .section-heading h2 { margin: 0; color: var(--brown-deep); font-size: 22px; font-weight: 800; }
 .menu-count { padding-bottom: 3px; color: var(--muted); font-size: 13px; }
-.category-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 22px; }
+.category-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 22px; }
 .category-tab {
   display: flex;
   min-height: 56px;
@@ -339,9 +312,7 @@ button:focus-visible, a:focus-visible, .product-card:focus-visible { outline: 3p
 @media (min-width: 760px) {
   .page-shell { width: min(100% - 64px, 1160px); padding-bottom: 68px; }
   .masthead { padding-top: 25px; }
-  .welcome { min-height: 250px; margin-top: 25px; padding-inline: 52px; }
-  .welcome h1 { font-size: 32px; }
-  .bean-art { inset-inline-end: 13%; width: 160px; }
+  .hero { margin-top: 25px; }
   .menu-section { margin-top: 50px; }
 }
 
@@ -355,11 +326,9 @@ button:focus-visible, a:focus-visible, .product-card:focus-visible { outline: 3p
   .brand-mark { width: 38px; border-radius: 12px; }
   .brand-name { font-size: 15px; }
   .open-note { gap: 6px; font-size: 11px; }
-  .welcome { min-height: 190px; margin-top: 17px; padding: 24px 20px; border-radius: 18px; }
-  .welcome h1 { max-width: 230px; font-size: 24px; }
-  .welcome-line { max-width: 245px; font-size: 13px; line-height: 1.8; }
+  .hero { margin-top: 17px; }
+  .hero-banner { border-radius: 18px; }
   .offer-button { min-height: 39px; margin-top: 12px; padding-inline: 14px; font-size: 13px; }
-  .bean-art { inset-inline-end: -12px; width: 102px; opacity: .42; }
   .offer-card { padding: 25px 20px; }
   .offer-image-frame { height: clamp(190px, 36vh, 270px); }
   .offer-name { font-size: 20px; }
@@ -377,7 +346,6 @@ button:focus-visible, a:focus-visible, .product-card:focus-visible { outline: 3p
   .category-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-bottom: 16px; }
   .category-tab { min-height: 49px; gap: 6px; padding-inline: 7px; border-radius: 12px; font-size: 13px; }
   .tab-icon { font-size: 15px; }
-  #desserts-tab { grid-column: 1 / -1; justify-self: center; width: min(100%, 180px); }
   .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .product-card { padding: 8px; border-radius: 16px; }
   .product-card::before { top: 8px; inset-inline-start: 8px; height: 27px; }

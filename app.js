@@ -45,10 +45,8 @@ function renderCafeInfo() {
 
   setText("#brand-name", cafe.brandName);
   setText("#brand-descriptor", cafe.brandDescriptor);
+  document.querySelector(".hero-banner").alt = `${cafe.name} ${cafe.brandDescriptor}`;
   setText("#header-note", cafe.header.note);
-  setText("#header-eyebrow", cafe.header.eyebrow);
-  setText("#header-title", cafe.header.title);
-  setText("#header-description", cafe.header.description);
   setText("#menu-eyebrow", cafe.header.menuEyebrow);
   setText("#menu-heading", cafe.header.menuTitle);
   setText("#footer-slogan", cafe.header.footer);
@@ -136,6 +134,9 @@ function normalizeCategory(value) {
   const compactCategory = category.replace(/\s+/g, "");
   if (["الحلويات", "حلويات", "حلى", "desserts"].includes(compactCategory)) {
     return "desserts";
+  }
+  if (["الفطور", "فطور", "breakfast"].includes(compactCategory)) {
+    return "breakfast";
   }
   return category;
 }
@@ -265,7 +266,8 @@ function showProductPreview(product) {
   const productCategory = product.category === "hot"
     ? "مشروب ساخن"
     : product.category === "cold" ? "مشروب بارد"
-      : product.category === "desserts" ? "حلويات" : product.category;
+      : product.category === "desserts" ? "حلويات"
+        : product.category === "breakfast" ? "الفطور" : product.category;
   const category = document.querySelector("#preview-category");
   category.textContent = productCategory;
   category.hidden = !productCategory;
@@ -338,7 +340,7 @@ function renderProducts() {
     const motif = document.createElement("span");
     motif.className = "product-motif";
     motif.setAttribute("aria-hidden", "true");
-    motif.textContent = activeCategory === "hot" ? "〰" : "✳";
+    motif.textContent = activeCategory === "hot" ? "〰" : activeCategory === "breakfast" ? "☀" : "✳";
 
     const content = document.createElement("div");
     content.className = "product-content";
@@ -388,17 +390,19 @@ function renderProducts() {
     fragment.append(card);
   });
 
-  if (activeCategory === "desserts" && visibleProducts.length === 0) {
+  if ((activeCategory === "desserts" || activeCategory === "breakfast") && visibleProducts.length === 0) {
     const emptyState = document.createElement("p");
     emptyState.className = "empty-state";
     emptyState.setAttribute("role", "status");
-    emptyState.textContent = "لا تتوفر أصناف حلويات حالياً، نأمل زيارتكم قريباً.";
+    emptyState.textContent = activeCategory === "breakfast"
+      ? "لا تتوفر أصناف فطور حالياً، نأمل زيارتكم قريباً."
+      : "لا تتوفر أصناف حلويات حالياً، نأمل زيارتكم قريباً.";
     fragment.append(emptyState);
   }
 
   productList.replaceChildren(fragment);
   productList.setAttribute("aria-labelledby", `${activeCategory}-tab`);
-  menuCount.textContent = `${visibleProducts.length} ${activeCategory === "desserts" ? "صنف" : "مشروب"}`;
+  menuCount.textContent = `${visibleProducts.length} ${activeCategory === "desserts" || activeCategory === "breakfast" ? "صنف" : "مشروب"}`;
 }
 
 async function loadProducts() {
