@@ -334,11 +334,12 @@ button:focus-visible, a:focus-visible, .product-card:focus-visible { outline: 3p
   .brand-name { font-size: 15px; }
   .open-note { gap: 6px; }
   .hero { margin-top: 17px; border-radius: 18px; }
-  .hero-banner { height: clamp(250px, 64vw, 320px); }
-  .hero-copy { align-items: flex-start; flex-direction: column; gap: 12px; padding: 16px 18px; }
-  .hero-copy h1 { font-size: 23px; }
-  .hero-description { font-size: 15px; }
-  .offer-button { min-height: 40px; padding-inline: 15px; font-size: 14px; }
+  .hero-banner { height: 145px; }
+  .hero-copy { align-items: center; gap: 10px; padding: 10px 12px; }
+  .eyebrow { margin-bottom: 1px; font-size: 12px; line-height: 1.45; }
+  .hero-copy h1 { font-size: 18px; line-height: 1.4; }
+  .hero-description { margin-top: 0; font-size: 12px; line-height: 1.5; }
+  .offer-button { min-height: 36px; gap: 6px; padding: 6px 10px; font-size: 12px; font-weight: 600; }
   .offer-card { padding: 25px 20px; }
   .offer-image-frame { height: clamp(190px, 36vh, 270px); }
   .offer-name { font-size: 20px; }
